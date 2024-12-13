@@ -1,7 +1,7 @@
 import { Schema, InferSchemaType, model} from "mongoose";
 
 
-const userSchema = new Schema({
+const documentSchema = new Schema({
     uploaded_by: { 
         user_id: Schema.Types.ObjectId,
         name: String,
@@ -11,5 +11,5 @@ const userSchema = new Schema({
     uploadd_date: { type: Date, default: new Date() }
 })
 
-export type User = InferSchemaType<typeof userSchema>;
-export default model<User>('user', userSchema); 
+export type User = InferSchemaType<typeof documentSchema>;
+export default model<User>('user', documentSchema); 

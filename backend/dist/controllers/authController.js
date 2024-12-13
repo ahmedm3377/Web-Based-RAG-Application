@@ -12,12 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.login_handler = exports.register_handler = void 0;
 const user_1 = __importDefault(require("../models/user"));
 const bcrypt_1 = require("bcrypt");
 const jsonwebtoken_1 = require("jsonwebtoken");
 // Register
 const register_handler = function (req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
+        console.log(req.body);
         const { fullname, email, password } = req.body;
         try {
             if (!email) {
@@ -29,7 +31,7 @@ const register_handler = function (req, res, next) {
             if (!fullname) {
                 throw new Error("Fullname is required");
             }
-            const userDoc = yield user_1.default.findOne({ email: email });
+            const userDoc = yield user_1.default.findOne({ email });
             if (userDoc != null) {
                 throw new Error("Email already exist");
             }
@@ -41,6 +43,7 @@ const register_handler = function (req, res, next) {
         }
     });
 };
+exports.register_handler = register_handler;
 // Login
 const login_handler = function (req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -56,25 +59,32 @@ const login_handler = function (req, res, next) {
             if (userDoc == null) {
                 throw new Error("Credentials are invalid!");
             }
-            // Verify the password
-            const salt = yield (0, bcrypt_1.genSalt)(10);
-            const hashedPassword = yield (0, bcrypt_1.hash)(password, salt);
-            const passwordMatch = yield (0, bcrypt_1.compare)(userDoc.password, hashedPassword);
+            const passwordMatch = yield (0, bcrypt_1.compare)(password, userDoc.password);
             if (!passwordMatch) {
                 throw new Error("Credentials are invalid!");
             }
-            if (!process.env.SECRET_KEY) {
+            if (!process.env.JWT_ACCESS_KEY_SECRET_KEY || !process.env.JWT_REFRESH_KEY_SECRET_KEY) {
                 throw new Error("No secret is provided!");
             }
-            const token = (0, jsonwebtoken_1.sign)({
+            const access_token = (0, jsonwebtoken_1.sign)({
                 user_id: userDoc._id,
                 fullname: userDoc.fullname,
                 email: userDoc.email,
-            }, process.env.SECRET_KEY);
-            res.status(201).send({ success: true, data: token });
+            }, process.env.JWT_ACCESS_KEY_SECRET_KEY, {
+                expiresIn: process.env.JWT_ACCESS_KEY_EXPRIRATION_DATE
+            });
+            const refresh_token = (0, jsonwebtoken_1.sign)({
+                user_id: userDoc._id,
+                fullname: userDoc.fullname,
+                email: userDoc.email,
+            }, process.env.JWT_REFRESH_KEY_SECRET_KEY, {
+                expiresIn: process.env.JWT_REFRESH_KEY_EXPRIRATION_DATE
+            });
+            res.status(201).send({ success: true, data: { access_token, refresh_token } });
         }
         catch (error) {
             next(error);
         }
     });
 };
+exports.login_handler = login_handler;

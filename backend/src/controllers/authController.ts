@@ -5,8 +5,8 @@ import { genSalt, hash, compare} from 'bcrypt';
 import { sign } from 'jsonwebtoken';
 
 // Register
-const register_handler: RequestHandler<unknown, StandardResponse<string>, User, unknown> = async function(req, res, next){
-    
+export const register_handler: RequestHandler<unknown, StandardResponse<string>, User, unknown> = async function(req, res, next){
+    console.log(req.body)
     const { fullname, email, password } = req.body;
 
     try{
@@ -22,7 +22,7 @@ const register_handler: RequestHandler<unknown, StandardResponse<string>, User, 
             throw new Error("Fullname is required");
         }
 
-        const userDoc = await userModel.findOne({email: email})
+        const userDoc = await userModel.findOne({ email })
         if( userDoc != null ){
             throw new Error("Email already exist")
         }
@@ -36,7 +36,7 @@ const register_handler: RequestHandler<unknown, StandardResponse<string>, User, 
 }
 
 // Login
-const login_handler: RequestHandler<unknown, StandardResponse<string>, User, unknown> = async function(req, res, next) {
+export const login_handler: RequestHandler<unknown, StandardResponse<{access_token: string, refresh_token: string}>, User, unknown> = async function(req, res, next) {
     const { email, password } = req.body;
     try{
         if (!email){
@@ -52,28 +52,41 @@ const login_handler: RequestHandler<unknown, StandardResponse<string>, User, unk
             throw new Error("Credentials are invalid!")
         }
 
-        // Verify the password
-        const salt = await genSalt(10);
-        const hashedPassword = await hash(password, salt);
-        const passwordMatch = await compare(userDoc.password, hashedPassword)
+        const passwordMatch = await compare(password, userDoc.password)
         if (!passwordMatch) {
             throw new Error("Credentials are invalid!")
         }
 
-        if(!process.env.SECRET_KEY){
+        if(!process.env.JWT_ACCESS_KEY_SECRET_KEY || !process.env.JWT_REFRESH_KEY_SECRET_KEY){
             throw new Error("No secret is provided!")
         }
 
-        const token  = sign(
+        const access_token  = sign(
             {
                 user_id: userDoc._id,
                 fullname: userDoc.fullname,
                 email: userDoc.email,
             },
-            process.env.SECRET_KEY
+            process.env.JWT_ACCESS_KEY_SECRET_KEY,
+            {
+                expiresIn: process.env.JWT_ACCESS_KEY_EXPRIRATION_DATE
+            }
         )
 
-        res.status(201).send({ success: true, data: token })
+
+        const refresh_token  = sign(
+            {
+                user_id: userDoc._id,
+                fullname: userDoc.fullname,
+                email: userDoc.email,
+            },
+            process.env.JWT_REFRESH_KEY_SECRET_KEY,
+            {
+                expiresIn: process.env.JWT_REFRESH_KEY_EXPRIRATION_DATE
+            }
+        )
+
+        res.status(201).send({ success: true, data: { access_token, refresh_token } })
     
     }catch(error){
         next(error)

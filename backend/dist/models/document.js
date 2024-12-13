@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
-const userSchema = new mongoose_1.Schema({
+const documentSchema = new mongoose_1.Schema({
     uploaded_by: {
         user_id: mongoose_1.Schema.Types.ObjectId,
         name: String,
@@ -10,4 +10,4 @@ const userSchema = new mongoose_1.Schema({
     file_name: { type: String, required: true, unique: true },
     uploadd_date: { type: Date, default: new Date() }
 });
-exports.default = (0, mongoose_1.model)('user', userSchema);
+exports.default = (0, mongoose_1.model)('user', documentSchema);
