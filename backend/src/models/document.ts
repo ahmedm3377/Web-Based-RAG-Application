@@ -8,7 +8,7 @@ const documentSchema = new Schema({
         email: String,
     },
     file_name: { type: String, required: true , unique: true},
-    uploadd_date: { type: Date, default: new Date() }
+    upload_date: { type: Date, default: new Date() }
 })
 
 export type User = InferSchemaType<typeof documentSchema>;
