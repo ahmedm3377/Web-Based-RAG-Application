@@ -1,3 +1,3 @@
 run:
-	docker compose up mongo -d
+	docker compose up mongo chroma -d
 	npx tsc && node dist/app.js
