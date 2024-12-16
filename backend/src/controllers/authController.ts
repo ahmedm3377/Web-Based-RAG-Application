@@ -15,16 +15,16 @@ export const register_handler: RequestHandler<unknown, StandardResponse<string>,
         }
 
         if(!password){
-            throw new Error("Password is required");
+            throw new Error("Password is required!");
         }
 
         if(!fullname){
-            throw new Error("Fullname is required");
+            throw new Error("Fullname is required!");
         }
 
         const userDoc = await userModel.findOne({ email })
         if( userDoc != null ){
-            throw new Error("Email already exist")
+            throw new Error("Email already exist!")
         }
 
         const new_user = await userModel.create(req.body);
@@ -63,9 +63,10 @@ export const login_handler: RequestHandler<unknown, StandardResponse<{access_tok
 
         const access_token  = sign(
             {
-                user_id: userDoc._id,
-                fullname: userDoc.fullname,
+                user_id: userDoc._id.toString(),
                 email: userDoc.email,
+                fullname: userDoc.fullname,
+
             },
             process.env.JWT_ACCESS_KEY_SECRET_KEY,
             {
@@ -76,7 +77,7 @@ export const login_handler: RequestHandler<unknown, StandardResponse<{access_tok
 
         const refresh_token  = sign(
             {
-                user_id: userDoc._id,
+                user_id: userDoc._id.toString(),
                 fullname: userDoc.fullname,
                 email: userDoc.email,
             },

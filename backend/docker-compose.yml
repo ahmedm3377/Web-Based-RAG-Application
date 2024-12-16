@@ -12,4 +12,4 @@ services:
     image: chromadb/chroma
     restart: always
     ports:
-      - 8080:8080
+      - 8000:8000

@@ -8,6 +8,7 @@ const documentSchema = new mongoose_1.Schema({
         email: String,
     },
     file_name: { type: String, required: true, unique: true },
+    file_path: { type: String, required: true, unique: true },
     upload_date: { type: Date, default: new Date() }
 });
-exports.default = (0, mongoose_1.model)('user', documentSchema);
+exports.default = (0, mongoose_1.model)('document', documentSchema);

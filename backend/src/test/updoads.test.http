@@ -1,0 +1,4 @@
+POST http://localhost:3000/docs/upload
+Content-Type: multipart/form-data
+
+files=@/home/souben/Downloads/RenderCV_EngineeringResumes_Theme.pdf;type=application/pdf
