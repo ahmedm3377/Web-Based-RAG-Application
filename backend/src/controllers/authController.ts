@@ -11,7 +11,9 @@ export const register_handler: RequestHandler<unknown, StandardResponse<string>,
 
     try{
         if (!email){
-            throw new Error("Email is required!");
+            res.status(400).json({success: false, data: "Email is required"});
+            return;
+
         }
 
         if(!password){
@@ -36,29 +38,39 @@ export const register_handler: RequestHandler<unknown, StandardResponse<string>,
 }
 
 // Login
-export const login_handler: RequestHandler<unknown, StandardResponse<{access_token: string, refresh_token: string}>, User, unknown> = async function(req, res, next) {
+export const login_handler: RequestHandler<unknown, StandardResponse<{ access_token: string, refresh_token?: string}>, User, unknown> = async function(req, res, next) {
     const { email, password } = req.body;
     try{
         if (!email){
-            throw new Error("Email is required!");
+            res.status(400).send({success: false, data: { access_token: "", refresh_token: ""}});
+            return;
+            // throw new Error("Email is required!");
         }
 
         if(!password){
-            throw new Error("Password is required");
+            res.status(400).json({success: false, data: { access_token: "", refresh_token: ""}});
+            return;
+            // throw new Error("Password is required");
         }
 
         const userDoc = await userModel.findOne({email: email})
         if( userDoc == null ){
-            throw new Error("Credentials are invalid!")
+            res.status(400).json({success: false, data: { access_token: "", refresh_token: ""}});
+            return;
+            // throw new Error("Credentials are invalid!")
         }
 
         const passwordMatch = await compare(password, userDoc.password)
         if (!passwordMatch) {
-            throw new Error("Credentials are invalid!")
+            res.status(400).json({success: false, data: { access_token: "", refresh_token: ""}});
+            return;
+            // throw new Error("Credentials are invalid!")
         }
 
         if(!process.env.JWT_ACCESS_KEY_SECRET_KEY || !process.env.JWT_REFRESH_KEY_SECRET_KEY){
-            throw new Error("No secret is provided!")
+            res.status(400).json({success: false, data: { access_token: "", refresh_token: ""}});
+            return;
+            // throw new Error("No secret is provided!")
         }
 
         const access_token  = sign(
