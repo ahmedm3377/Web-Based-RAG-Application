@@ -11,26 +11,22 @@ export const register_handler: RequestHandler<unknown, StandardResponse<string>,
 
     try{
         if (!email){
-            res.status(400).json({success: false, data:"Email is required"});
+            res.status(400).json({success: false, data: "Email is required"});
             return;
 
         }
 
         if(!password){
-            res.status(400).json({success: false, data:"Password is required"});
-            return;
-
+            throw new Error("Password is required!");
         }
 
         if(!fullname){
-            res.status(400).json({success: false, data:"Fullname is required"});
-            return;
+            throw new Error("Fullname is required!");
         }
 
         const userDoc = await userModel.findOne({ email })
         if( userDoc != null ){
-            res.status(400).json({success: false, data:"Email already exist"});
-            return;
+            throw new Error("Email already exist!")
         }
 
         const new_user = await userModel.create(req.body);
@@ -46,42 +42,43 @@ export const login_handler: RequestHandler<unknown, StandardResponse<{ access_to
     const { email, password } = req.body;
     try{
         if (!email){
-            res.status(400).json({success: false});
+            res.status(400).send({success: false, data: { access_token: "", refresh_token: ""}});
             return;
             // throw new Error("Email is required!");
         }
 
         if(!password){
-            res.status(400).json({success: false});
+            res.status(400).json({success: false, data: { access_token: "", refresh_token: ""}});
             return;
             // throw new Error("Password is required");
         }
 
         const userDoc = await userModel.findOne({email: email})
         if( userDoc == null ){
-            res.status(400).json({success: false});
+            res.status(400).json({success: false, data: { access_token: "", refresh_token: ""}});
             return;
             // throw new Error("Credentials are invalid!")
         }
 
         const passwordMatch = await compare(password, userDoc.password)
         if (!passwordMatch) {
-            res.status(400).json({success: false});
+            res.status(400).json({success: false, data: { access_token: "", refresh_token: ""}});
             return;
             // throw new Error("Credentials are invalid!")
         }
 
         if(!process.env.JWT_ACCESS_KEY_SECRET_KEY || !process.env.JWT_REFRESH_KEY_SECRET_KEY){
-            res.status(400).json({success: false});
+            res.status(400).json({success: false, data: { access_token: "", refresh_token: ""}});
             return;
             // throw new Error("No secret is provided!")
         }
 
         const access_token  = sign(
             {
-                user_id: userDoc._id,
-                fullname: userDoc.fullname,
+                user_id: userDoc._id.toString(),
                 email: userDoc.email,
+                fullname: userDoc.fullname,
+
             },
             process.env.JWT_ACCESS_KEY_SECRET_KEY,
             {
@@ -92,7 +89,7 @@ export const login_handler: RequestHandler<unknown, StandardResponse<{ access_to
 
         const refresh_token  = sign(
             {
-                user_id: userDoc._id,
+                user_id: userDoc._id.toString(),
                 fullname: userDoc.fullname,
                 email: userDoc.email,
             },

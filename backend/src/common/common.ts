@@ -1,4 +1,10 @@
 export type StandardResponse<T>  = {
     success: Boolean;
-    data?: T;
+    data: T;
 }
+
+export type UserInfo  = {
+    user_id: string;
+    email: string;
+    fullname: string;
+}   

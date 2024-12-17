@@ -8,8 +8,9 @@ const documentSchema = new Schema({
         email: String,
     },
     file_name: { type: String, required: true , unique: true},
+    file_path: { type: String, required: true, unique: true },
     upload_date: { type: Date, default: new Date() }
 })
 
-export type User = InferSchemaType<typeof documentSchema>;
-export default model<User>('user', documentSchema); 
+export type Document = InferSchemaType<typeof documentSchema>;
+export default model<Document>('document', documentSchema); 
