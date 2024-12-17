@@ -6,7 +6,7 @@ import { sign } from 'jsonwebtoken';
 
 // Register
 export const register_handler: RequestHandler<unknown, StandardResponse<string>, User, unknown> = async function(req, res, next){
-    console.log(req.body)
+
     const { fullname, email, password } = req.body;
 
     try{

@@ -15,6 +15,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 const router = Router();
+
 router.post('/upload', upload.array('files'), upload_handler);
+router.post('/query', upload_handler);
 
 export default router;

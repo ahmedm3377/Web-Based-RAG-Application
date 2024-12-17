@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const multer_1 = __importDefault(require("multer"));
 const docController_1 = require("../controllers/docController");
-const router = (0, express_1.Router)();
 // Storage option is used here to keep the original filename
 const storage = multer_1.default.diskStorage({
     destination: function (req, file, cb) {
@@ -17,5 +16,6 @@ const storage = multer_1.default.diskStorage({
     }
 });
 const upload = (0, multer_1.default)({ storage: storage });
+const router = (0, express_1.Router)();
 router.post('/upload', upload.array('files'), docController_1.upload_handler);
 exports.default = router;
