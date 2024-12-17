@@ -10,8 +10,9 @@ import { UsersService } from './Users/user.service';
    @if(loggedInUser().email)
     { <button [routerLink]="['']"> Sign out</button>}
    @else{
-    <button [routerLink]="['signup']">Sign up</button> |
-    <button [routerLink]="['signin']"> Sign in</button>
+    <button [routerLink]="['signup']">Sign up</button> | 
+    <button [routerLink]="['signin']"> Sign in</button> | 
+    <button [routerLink]="['chat']"> chat</button>
    }
    
     <router-outlet></router-outlet>

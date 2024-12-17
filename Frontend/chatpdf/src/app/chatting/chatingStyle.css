@@ -1,0 +1,71 @@
+form {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 2px solid #4a90e2;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+fieldset {
+  border: none;
+  margin-bottom: 20px;
+}
+
+legend {
+  font-size: 1.5em;
+  color: #4a90e2;
+  margin-bottom: 10px;
+}
+
+.file-input {
+  display: inline;
+  margin: 10px 0;
+}
+
+.upload-button {
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  align: right;
+}
+
+.upload-button:hover {
+  background-color: #45a049;
+}
+
+.relative {
+  position: relative;
+}
+
+.search-input {
+  width: calc(100% - 50px); /* Adjusts for button width */
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  transition: border-color 0.3s;
+}
+
+.search-input:focus {
+  border-color: #4a90e2;
+  outline: none;
+}
+
+.search-button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  padding: 0 15px;
+  cursor: pointer;
+}
