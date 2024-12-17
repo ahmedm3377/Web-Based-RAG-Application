@@ -11,7 +11,7 @@ export const register_handler: RequestHandler<unknown, StandardResponse<string>,
 
     try{
         if (!email){
-            res.status(400).json({success: false, data: "Email is required"});
+            res.status(400).json({success: false, data: "Email is required!"});
             return;
 
         }

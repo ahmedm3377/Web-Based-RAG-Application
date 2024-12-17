@@ -16,7 +16,7 @@ const llm = new Ollama({ model: process.env.LLM_MODEL })
 export const save_pdf_chroma = async (file: Express.Multer.File, user_id: string) => {
     try {
         // Parse the document
-        const loader = new PDFLoader(file.path, { splitPages: false });
+        const loader = new PDFLoader(file.path, { splitPages: true });
         const docs = await loader.load();
         
         // Split the document into chunks
@@ -28,7 +28,6 @@ export const save_pdf_chroma = async (file: Express.Multer.File, user_id: string
         const splits = await textSplitter.splitDocuments(docs)
         // Add the user_id to the metadata for retrieving purposes
         const chunks = splits.map(split => {
-            console.log(split.metadata)
             return { pageContent: split.pageContent, metadata: {filename: file.originalname, user_id, ...split.metadata} }
         })
 
@@ -55,7 +54,14 @@ export const query_pdf = async (user_id: string, question: string, files: string
         if(files && files.length == 0){
             retriever = vectorStore.asRetriever({ filter: {user_id} })
         }else{
-            retriever = vectorStore.asRetriever({ filter: {user_id, "filename": {"$in": files} } })
+            retriever = vectorStore.asRetriever({ 
+                filter: { 
+                    "$and": [
+                        {user_id },
+                        {"filename": {"$in": files}}
+                    ] 
+                }
+            })
         }
         const results  = await retriever.invoke(question)
 

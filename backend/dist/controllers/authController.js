@@ -12,7 +12,7 @@ const register_handler = async function (req, res, next) {
     const { fullname, email, password } = req.body;
     try {
         if (!email) {
-            res.status(400).json({ success: false, data: "Email is required" });
+            res.status(400).json({ success: false, data: "Email is required!" });
             return;
         }
         if (!password) {

@@ -18,4 +18,5 @@ const storage = multer_1.default.diskStorage({
 const upload = (0, multer_1.default)({ storage: storage });
 const router = (0, express_1.Router)();
 router.post('/upload', upload.array('files'), docController_1.upload_handler);
+router.post('/query', docController_1.query_handler);
 exports.default = router;

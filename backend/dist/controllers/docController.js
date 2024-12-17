@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.query_handler = exports.upload_handler = void 0;
 const document_1 = __importDefault(require("../models/document"));
 const docHelper_1 = require("./helpers/docHelper");
+const user_1 = __importDefault(require("../models/user"));
 // Upload handler to uploading documents, save them to MongoDB and Chroma 
 const upload_handler = async function (req, res, next) {
     try {
@@ -27,8 +28,10 @@ const upload_handler = async function (req, res, next) {
                     file_path: file.path,
                 };
                 const doc = await document_1.default.findOne({ "file_name": file.originalname });
-                if (doc)
-                    return next(new Error("Document already exist!"));
+                if (doc) {
+                    failedFiles.push(`${file.originalname} - File already exist!`);
+                    continue;
+                }
                 // Save the file metadata to MongoDB
                 await document_1.default.create(document);
                 // Split the document into chunks and save them to Chroma
@@ -42,7 +45,7 @@ const upload_handler = async function (req, res, next) {
                 }
             }
             catch (err) {
-                failedFiles.push(file.originalname);
+                failedFiles.push(`${file.originalname} - ${err.message}!`);
             }
         }
         res.send({ success: true, data: { processedFiles, failedFiles } });
@@ -52,12 +55,22 @@ const upload_handler = async function (req, res, next) {
     }
 };
 exports.upload_handler = upload_handler;
-// Upload handler to uploading documents, save them to MongoDB and Chroma 
+// Query handler to answer user questions based on the uploaded
 const query_handler = async function (req, res, next) {
     try {
-        const files = req.params.files.split(",");
         if (!req.user)
             throw new Error("Forbidden");
+        const files = req.query.files.split(",");
+        const question = req.body.question;
+        if (!question)
+            throw new Error("Question is required!");
+        const answer = await (0, docHelper_1.query_pdf)(req.user.user_id, question, files);
+        // Save the question and the answer to the chat history before sending the answer
+        await user_1.default.updateOne({ _id: req.user.user_id }, { "$push": {
+                "chat_history": { question, answer, documents: files }
+            }
+        });
+        res.send({ success: true, data: answer });
     }
     catch (err) {
         next(err);

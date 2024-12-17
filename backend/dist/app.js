@@ -22,7 +22,7 @@ app.use((req, res, next) => {
 });
 // 500 Not Found Middleware
 app.use((err, req, res, next) => {
-    res.status(500).json({ success: false, error: `An error occured: ${err}` });
+    res.status(500).json({ success: false, error: `${err.message}` });
 });
 app.listen(process.env.PORT, () => {
     console.log(`Server is listening at http://localhost:${process.env.PORT}`);

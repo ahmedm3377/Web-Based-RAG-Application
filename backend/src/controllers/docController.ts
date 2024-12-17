@@ -2,6 +2,7 @@ import { RequestHandler } from "express";
 import documentModel from '../models/document';
 import { query_pdf, save_pdf_chroma } from "./helpers/docHelper";
 import { StandardResponse } from "../common/common";
+import userModel from '../models/user';
 
 // Upload handler to uploading documents, save them to MongoDB and Chroma 
 export const upload_handler: RequestHandler = async function(req, res, next){
@@ -12,7 +13,6 @@ export const upload_handler: RequestHandler = async function(req, res, next){
     }
 
     if(!req.user) throw new Error('Forbidden');
-
     const files = req.files as Express.Multer.File[];
     const failedFiles: string[] = []
     const processedFiles: string[] = []
@@ -28,7 +28,7 @@ export const upload_handler: RequestHandler = async function(req, res, next){
         const doc = await documentModel.findOne({"file_name": file.originalname});
 
         if(doc){
-          failedFiles.push(file.originalname)
+          failedFiles.push(`${file.originalname} - File already exist!`)
           continue;
         }
         // Save the file metadata to MongoDB
@@ -44,7 +44,7 @@ export const upload_handler: RequestHandler = async function(req, res, next){
             failedFiles.push(file.originalname)
         }
       }catch(err){
-        failedFiles.push(file.originalname)
+        failedFiles.push(`${file.originalname} - ${(err as Error).message}!`)
       }
     }
     res.send({success: true, data: { processedFiles, failedFiles } })
@@ -56,20 +56,28 @@ export const upload_handler: RequestHandler = async function(req, res, next){
 
 
 // Query handler to answer user questions based on the uploaded
-export const query_handler: RequestHandler<{files: string}, StandardResponse<string>, {question: string}, unknown> = async function(req, res, next){
+export const query_handler: RequestHandler<unknown, StandardResponse<string>, {question: string}, {files: string}> = async function(req, res, next){
   try {
 
     if(!req.user) throw new Error("Forbidden");
     
-    const files = req.params.files.split(",");
+    const files = req.query.files.split(",");
     const question = req.body.question;
       
     if(!question) throw new Error("Question is required!");
 
+    const answer = await query_pdf(req.user.user_id, question, files)
+    // Save the question and the answer to the chat history before sending the answer
+    await userModel.updateOne(
+      { _id: req.user.user_id }, 
+      { "$push": 
+        { 
+          "chat_history": { question, answer, documents: files}
+        } 
+      }
+    )
 
-    const response = await query_pdf(req.user.user_id, question, files)
-    res.send({ success: true, data: response})
-
+    res.send({ success: true, data: answer})
   }catch(err){
     next(err)
   }
