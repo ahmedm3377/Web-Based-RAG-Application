@@ -3,7 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { UsersService } from './user.service';
 import { User, Token } from './userType';
-import { StateService } from './state.service';
+
 import { jwtDecode } from 'jwt-decode';
 
 @Component({
@@ -51,7 +51,7 @@ import { jwtDecode } from 'jwt-decode';
 })
 export class SigninComponent {
   #user_service = inject(UsersService);
-  #state = inject(StateService);
+  #state = inject(UsersService);
   #router = inject(Router);
 
   form = inject(FormBuilder).nonNullable.group({
@@ -62,13 +62,13 @@ export class SigninComponent {
   submit() {
     this.#user_service.signin(this.form.value as {email:String, password:String}).subscribe(response => {
       const decoded = jwtDecode(response.data.access_token) as Token;
-      this.#state.$state.set({
-        user_id: decoded.user_id,
-        fullname: decoded.fullname,
+      this.#state.$user.set({
+        name: decoded.fullname,
         email: decoded.email,
+        id: decoded.user_id,
         jwt: response.data.access_token
       });
-      this.#router.navigate(['', 'chatpage']);
+      this.#router.navigate(['chat']);
     });
   }
 
