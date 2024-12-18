@@ -11,4 +11,3 @@ const querySchema = new mongoose_1.Schema({
     query_text: { type: String, required: true },
     response_text: { type: String }
 }, { timestamps: true });
-exports.default = (0, mongoose_1.model)('user', querySchema);

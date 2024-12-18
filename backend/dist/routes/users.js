@@ -2,9 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const userController_1 = require("../controllers/userController");
-const auth_1 = require("../utils/auth");
 const router = (0, express_1.Router)();
 router.post('/register', userController_1.register_handler);
 router.post('/login', userController_1.login_handler);
-router.get('/chat_history', auth_1.is_authenticated, userController_1.chat_history);
+//router.get('/chat_history', is_authenticated, chat_history);
 exports.default = router;

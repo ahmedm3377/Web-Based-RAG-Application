@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.query_handler = exports.upload_handler = void 0;
 const document_1 = __importDefault(require("../models/document"));
 const docHelper_1 = require("./helpers/docHelper");
-const user_1 = __importDefault(require("../models/user"));
+const history_1 = __importDefault(require("../models/history"));
 // Upload handler to uploading documents, save them to MongoDB and Chroma 
 const upload_handler = async function (req, res, next) {
     try {
@@ -60,16 +60,39 @@ const query_handler = async function (req, res, next) {
     try {
         if (!req.user)
             throw new Error("Forbidden");
-        const files = req.query.files.split(",");
+        const files = req.query.files ? req.query.files.split(",") : [];
         const question = req.body.question;
+        const chat_id = req.body.chat_id || null;
         if (!question)
             throw new Error("Question is required!");
-        const answer = await (0, docHelper_1.query_pdf)(req.user.user_id, question, files);
-        // Save the question and the answer to the chat history before sending the answer
-        await user_1.default.updateOne({ _id: req.user.user_id }, { "$push": {
-                "chat_history": { question, answer, documents: files }
-            }
-        });
+        // Call query_pdf to get the answer
+        const answer = await (0, docHelper_1.query_pdf)(req.user.user_id, question, chat_id, files);
+        if (chat_id) {
+            // Update existing chat history with the new question and answer
+            await history_1.default.updateOne({ _id: chat_id }, {
+                $push: {
+                    messages: [
+                        { role: "human", content: question },
+                        { role: "assistant", content: answer },
+                    ],
+                },
+            });
+        }
+        else {
+            // Create a new chat history if no chat_id is provided
+            await history_1.default.create({
+                created_by: {
+                    user_id: req.user.user_id,
+                    name: req.user.fullname,
+                    email: req.user.email,
+                },
+                documents: files,
+                messages: [
+                    { role: "human", content: question },
+                    { role: "assistant", content: answer },
+                ],
+            });
+        }
         res.send({ success: true, data: answer });
     }
     catch (err) {

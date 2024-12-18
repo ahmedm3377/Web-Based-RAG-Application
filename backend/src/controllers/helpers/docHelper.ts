@@ -2,9 +2,14 @@ import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { Chroma } from "@langchain/community/vectorstores/chroma";
 import { Ollama, OllamaEmbeddings } from "@langchain/ollama";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { pull } from 'langchain/hub';
 import { VectorStoreRetriever } from '@langchain/core/vectorstores';
+import historyModel from '../../models/history';
+import { createHistoryAwareRetriever } from "langchain/chains/history_aware_retriever";
+import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
+import { createRetrievalChain } from "langchain/chains/retrieval";
+import { AIMessage, BaseMessage, HumanMessage } from "@langchain/core/messages";
 
 
 // Create embedding & vector store instances
@@ -40,15 +45,25 @@ export const save_pdf_chroma = async (file: Express.Multer.File, user_id: string
 } 
 
 // Retrive relevant documents and pass the results to Ollama to answer the prompt
-export const query_pdf = async (user_id: string, question: string, files: string[]) => {
+export const query_pdf = async (user_id: string, question: string, chat_id: string | null, files: string[]) => {
     try {
+
+        // Check if the question is set
         if(!question){
             throw new Error("Query PDF: Question is required!")
         }
 
+        // Check if the user_id is set
         if(!user_id){
             throw new Error("Query PDF: User ID is required!")
         }
+
+        // Fetch the chat history if there is one
+        const history: [{ role: string, content: string }] | null = await historyModel.findOne(
+            { _id: chat_id, "created_by.user_id": user_id},
+            { _id: 0, messages: 1 }
+        )   
+
         // Retrieve the relevant documents
         let retriever!: VectorStoreRetriever<Chroma>;
         if(files && files.length == 0){
@@ -63,15 +78,61 @@ export const query_pdf = async (user_id: string, question: string, files: string
                 }
             })
         }
-        const results  = await retriever.invoke(question)
 
-        // Create a context and construct a prompt that includes the question and the context
-        const context = results.map( doc => doc.pageContent ).join("\n");
-        const template = await pull<ChatPromptTemplate>("rlm/rag-prompt");
-        const messages = await template.invoke({question, context})
+        // Create a prompt that includes the chat history
+        const contextualizedQSystemPrompt = 
+            "Given a chat history and the latest user question which might reference context in the chat history," +
+            "formulate a standalone question which can be understood without the chat history. Do NOT answer the question, " +
+            "just reformulate it if needed and otherwise return it as is.";
 
-        // Invoke Ollama given the context and the prompt
-        return await llm.invoke(messages)
+        const contextualizedQPrompt = ChatPromptTemplate.fromMessages([
+            ["system", contextualizedQSystemPrompt],
+            new MessagesPlaceholder("chathistory"),
+            ["human", "{input}"]
+        ])
+
+        // Instantiate a history aware retirever
+        const historyAwareRetriever = await createHistoryAwareRetriever({
+            llm,
+            retriever,
+            rephrasePrompt: contextualizedQPrompt
+        })
+
+        // Create the full QA chain
+        const systemPrompt =
+            "You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer " +
+            "the question. If you don't know the answer, say that you don't know. Use three sentences maximum and keep the " +
+            "answer concise. \n\n" +
+            "{context}";
+        
+        const qaPrompt = ChatPromptTemplate.fromMessages([
+            ["system", systemPrompt],
+            new MessagesPlaceholder("chat_history"),
+            ["human", "{input}"]
+        ])
+
+        const QAchain = await createStuffDocumentsChain({
+            llm,
+            prompt: qaPrompt,
+        })
+
+        const ragChain = await createRetrievalChain({
+            retriever: historyAwareRetriever,
+            combineDocsChain: QAchain,
+        })
+
+        let chat_history: BaseMessage[] = []
+        if(history){
+            chat_history = history.map(
+                ({ role, content }) => {
+                    if( role == "human" ) return new HumanMessage(content);
+                    else return new AIMessage(content)
+                }
+            )
+        }
+        const aiMessage = await ragChain.invoke({ "input": question, "chat_history": chat_history })
+        console.log(aiMessage)
+        return aiMessage.answer
     }catch(err){
         throw err
     }    

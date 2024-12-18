@@ -14,4 +14,3 @@ const querySchema = new Schema({
 )
 
 export type User = InferSchemaType<typeof querySchema>;
-export default model<User>('user', querySchema); 
