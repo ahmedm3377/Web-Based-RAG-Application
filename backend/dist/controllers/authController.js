@@ -9,11 +9,11 @@ const bcrypt_1 = require("bcrypt");
 const jsonwebtoken_1 = require("jsonwebtoken");
 // Register
 const register_handler = async function (req, res, next) {
-    console.log(req.body);
     const { fullname, email, password } = req.body;
     try {
         if (!email) {
-            throw new Error("Email is required!");
+            res.status(400).json({ success: false, data: "Email is required!" });
+            return;
         }
         if (!password) {
             throw new Error("Password is required!");
@@ -38,21 +38,31 @@ const login_handler = async function (req, res, next) {
     const { email, password } = req.body;
     try {
         if (!email) {
-            throw new Error("Email is required!");
+            res.status(400).send({ success: false, data: { access_token: "", refresh_token: "" } });
+            return;
+            // throw new Error("Email is required!");
         }
         if (!password) {
-            throw new Error("Password is required");
+            res.status(400).json({ success: false, data: { access_token: "", refresh_token: "" } });
+            return;
+            // throw new Error("Password is required");
         }
         const userDoc = await user_1.default.findOne({ email: email });
         if (userDoc == null) {
-            throw new Error("Credentials are invalid!");
+            res.status(400).json({ success: false, data: { access_token: "", refresh_token: "" } });
+            return;
+            // throw new Error("Credentials are invalid!")
         }
         const passwordMatch = await (0, bcrypt_1.compare)(password, userDoc.password);
         if (!passwordMatch) {
-            throw new Error("Credentials are invalid!");
+            res.status(400).json({ success: false, data: { access_token: "", refresh_token: "" } });
+            return;
+            // throw new Error("Credentials are invalid!")
         }
         if (!process.env.JWT_ACCESS_KEY_SECRET_KEY || !process.env.JWT_REFRESH_KEY_SECRET_KEY) {
-            throw new Error("No secret is provided!");
+            res.status(400).json({ success: false, data: { access_token: "", refresh_token: "" } });
+            return;
+            // throw new Error("No secret is provided!")
         }
         const access_token = (0, jsonwebtoken_1.sign)({
             user_id: userDoc._id.toString(),

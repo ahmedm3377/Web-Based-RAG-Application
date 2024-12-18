@@ -6,12 +6,12 @@ import { sign } from 'jsonwebtoken';
 
 // Register
 export const register_handler: RequestHandler<unknown, StandardResponse<string>, User, unknown> = async function(req, res, next){
-    console.log(req.body)
+
     const { fullname, email, password } = req.body;
 
     try{
         if (!email){
-            res.status(400).json({success: false, data: "Email is required"});
+            res.status(400).json({success: false, data: "Email is required!"});
             return;
 
         }
@@ -104,4 +104,18 @@ export const login_handler: RequestHandler<unknown, StandardResponse<{ access_to
     }catch(error){
         next(error)
     }
+}
+
+
+export const chat_history: RequestHandler = async (req, res, next) =>{
+    if(!req.user) throw new Error('Forbidden!')
+    try{
+        // Fetch the chat history
+        const id = req.user.user_id
+        const history = await userModel.findOne({_id: id}, {_id:0, fullname: 0, email: 0, password: 0, __v: 0})
+        res.send({ success: true, data: history })
+    }catch(err){
+        next(err)
+    }
+
 }

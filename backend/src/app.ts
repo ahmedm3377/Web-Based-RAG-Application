@@ -22,7 +22,7 @@ app.use((req, res, next) => {
 
 // 500 Not Found Middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  res.status(500).json({ success:false, error: 'An error occured, please  try again!' });
+  res.status(500).json({ success:false, error: `${err.message}` });
 });
 
 
