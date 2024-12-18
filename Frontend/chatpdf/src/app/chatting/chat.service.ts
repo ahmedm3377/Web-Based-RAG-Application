@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 
 import { SERVER_URL } from '../../../environments/environment.development';
@@ -15,15 +15,15 @@ export class ChatService {
  
    #http = inject(HttpClient);
  
-   uploadFile(data: File) {
-     return this.#http.post<{ success: boolean, data: { processedFiles: string, failedFiles: string } }>(SERVER_URL + 'upload', data);
+   uploadFile(files: File) {
+     return this.#http.post<{ success: boolean, data: { processedFiles: string, failedFiles: string } }>(SERVER_URL + 'docs/upload', files);
    }
    
-   SendQuery(query:String) {
-     return this.#http.post<{ success: boolean, data: string }>(SERVER_URL + 'TBD', query);
+   SendQuery(question:String) {
+     return this.#http.post<{ success: boolean, data: string }>(SERVER_URL + 'docs/query', question);
    }
 
    giveSummary(file: string) {
-    return this.#http.post<{ success: boolean, data: string  }>(SERVER_URL + 'TBD', file);
+    return this.#http.get<{ success: boolean, data: string  }>(SERVER_URL + 'docs/summarize?files=' + file);
   }
 }

@@ -75,7 +75,7 @@ export class PromptComponent {
           let result = ""
           this.chatService.SendQuery(textValue).subscribe(response => {result = response.data;});
           
-          this.msgFromChild.emit([{ question: true, data: textValue },{ question: false, data: "123" }]);
+          this.msgFromChild.emit([{ question: true, data: textValue },{ question: false, data: result }]);
 
 
           console.log(textValue);
