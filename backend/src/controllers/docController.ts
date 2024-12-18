@@ -54,12 +54,12 @@ export const upload_handler: RequestHandler = async function(req, res, next){
 }
 
 // Query handler to answer user questions based on the uploaded
-export const query_handler: RequestHandler<unknown, StandardResponse<string>, {question: string, chat_id?: string}, {files: string}> = async function(req, res, next){
+export const query_handler: RequestHandler<unknown, StandardResponse<string>, {query: string, chat_id?: string}, {files: string}> = async function(req, res, next){
   try {
     if (!req.user) throw new Error("Forbidden");
 
     const files = req.query.files ? req.query.files.split(",") : [];
-    const question = req.body.question;
+    const question = req.body.query;
     const chat_id = req.body.chat_id || null;
 
     if (!question) throw new Error("Question is required!");
