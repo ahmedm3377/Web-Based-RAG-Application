@@ -1,13 +1,14 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { ApplicationConfig, inject, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideRouter, withComponentInputBinding, withInMemoryScrolling, withViewTransitions } from '@angular/router';
+import { provideRouter, Router, withComponentInputBinding, withInMemoryScrolling, withViewTransitions } from '@angular/router';
 import { HomeComponent } from './home.component';
 import { SignupComponent } from './Users/signup.component';
 import { SigninComponent } from './Users/signin.component';
 import { addTokenInterceptor } from './add-token.interceptor';
 import { UsersService } from './Users/user.service';
 import { jwtDecode } from 'jwt-decode';
+import { AuthGuardService } from './auth-guard.service';
 
 
 function isTokenValid(token: string): boolean {
@@ -44,8 +45,8 @@ export const appConfig: ApplicationConfig = {
       { path: '', component: HomeComponent, pathMatch: 'full' },
       { path: 'signup', component: SignupComponent },
       { path: 'signin', component: SigninComponent },
-      { path: 'chat', loadComponent: () => import('./chatting/chat/chat.component').then(m => m.ChatComponent),
-        canActivate: [() => inject(UsersService).isLoggedIn()]
+      { path: 'chat', loadComponent: () => import('./chatting/chat.component').then(m => m.ChatComponent),
+        canActivate: [ AuthGuardService]
        },
       { path: '**', component: HomeComponent },
     ], withComponentInputBinding(), withViewTransitions(), withInMemoryScrolling({ scrollPositionRestoration: 'enabled' })),

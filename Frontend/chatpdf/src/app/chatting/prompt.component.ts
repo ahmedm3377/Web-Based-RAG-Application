@@ -1,6 +1,6 @@
 import { Component, inject, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ChatService } from '../../chat.service';
+import { ChatService } from './chat.service';
 interface chatMessage {   question: boolean, data: string }
 
 
@@ -45,6 +45,12 @@ interface chatMessage {   question: boolean, data: string }
         >>
     </button>
 </div>
+<div>
+  @if(selectedFile){
+    <p> File: {{selectedFile.name}}  <button (click)="getSummary()">Summary</button></p>
+  }
+
+</div>
 </form>
 </div>
   `,
@@ -55,6 +61,7 @@ interface chatMessage {   question: boolean, data: string }
 export class PromptComponent {
   chatService = inject(ChatService);
   msgFromChild = output<chatMessage[]>();
+  summary = output<string>();
 
 
   form = inject(FormBuilder).nonNullable.group({
@@ -78,16 +85,36 @@ export class PromptComponent {
     }
 
   selectedFile: File | null = null;
+  
 
   onFileSelected(event: any) {
     this.selectedFile = event.target.files[0];
   }
+
+  filename = "";
   uploadFile() {
     if (this.selectedFile) {
-      this.chatService.uploadFile(this.selectedFile);
+      const result = this.chatService.uploadFile(this.selectedFile);
+      result.subscribe(response => {
+        if (response.success) {
+            alert("File uploaded successfully!"); 
+            this.filename = response.data.processedFiles;
+        }
+    });
       console.log('Uploading file:', this.selectedFile);
 
     }
+  }
+
+
+  getSummary(){
+
+    this.chatService.giveSummary(this.filename).subscribe(res => {
+      console.log(res);
+      this.summary.emit(res.data);
+
+    }); 
+
   }
 
 

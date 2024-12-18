@@ -1,15 +1,12 @@
 import { Component } from '@angular/core';
-import { PromptComponent } from '../prompt/prompt.component';
-interface chatMessage {   question: boolean, data: string }
-import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-chat',
-  imports: [PromptComponent],
+  selector: 'app-summary',
+  imports: [],
   template: `
-   
+    
+    
    <div class="flex flex-col items-center justify-center  bg-gray-100 p-4">
-      <h2 class="mb-4 text-2xl font-bold text-gray-800">Secure Chating with PDF</h2>
       
       <div class="bg-white rounded-lg shadow-md p-6 max-w-6xl w-full">
           @if(msg[0].question)
@@ -31,14 +28,17 @@ import { CommonModule } from '@angular/common';
 </div>
 
 
-   
+
+
   `,
   styles: ``
 })
-export class ChatComponent {
+export class SummaryComponent {
+
   msg: chatMessage[]= [{ question: false, data: '' }];
   receive(data: chatMessage[]) {  
     this.msg = data;
     console.log('received', data);
     }
+
 }

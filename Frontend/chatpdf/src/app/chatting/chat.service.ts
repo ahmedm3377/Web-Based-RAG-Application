@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 
-import { SERVER_URL } from '../../environments/environment.development';
+import { SERVER_URL } from '../../../environments/environment.development';
 
 
 
@@ -16,10 +16,14 @@ export class ChatService {
    #http = inject(HttpClient);
  
    uploadFile(data: File) {
-     return this.#http.post<{ success: boolean, data: string }>(SERVER_URL + 'TBD', data);
+     return this.#http.post<{ success: boolean, data: { processedFiles: string, failedFiles: string } }>(SERVER_URL + 'upload', data);
    }
    
    SendQuery(query:String) {
      return this.#http.post<{ success: boolean, data: string }>(SERVER_URL + 'TBD', query);
    }
+
+   giveSummary(file: string) {
+    return this.#http.post<{ success: boolean, data: string  }>(SERVER_URL + 'TBD', file);
+  }
 }
