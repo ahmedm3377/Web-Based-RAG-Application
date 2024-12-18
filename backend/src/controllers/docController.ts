@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import documentModel from '../models/document';
-import { query_pdf, save_pdf_chroma } from "./helpers/docHelper";
+import { query_pdf, save_pdf_chroma, summarize_pdfs } from "./helpers/docHelper";
 import { StandardResponse } from "../common/common";
 import historyModel from '../models/history';
 
@@ -53,8 +53,6 @@ export const upload_handler: RequestHandler = async function(req, res, next){
   }
 }
 
-
-
 // Query handler to answer user questions based on the uploaded
 export const query_handler: RequestHandler<unknown, StandardResponse<string>, {question: string, chat_id?: string}, {files: string}> = async function(req, res, next){
   try {
@@ -98,6 +96,25 @@ export const query_handler: RequestHandler<unknown, StandardResponse<string>, {q
       });
     }
 
+    res.send({ success: true, data: answer });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+// Summarize handler to generate a summary for specifc pdfs
+export const summarize_handler: RequestHandler<unknown, StandardResponse<string>, unknown, {files: string}> = async function(req, res, next){
+  try {
+    console.log(req.url)
+    if (!req.user) throw new Error("Forbidden");
+
+    const files = req.query.files ? req.query.files.split(",") : [];
+
+    if( !files) throw new Error("Summarizing: Files are required!");
+
+    // Call the `summarize_pdfs` helper function to get the answer
+    const answer = await summarize_pdfs(req.user.user_id, files);
     res.send({ success: true, data: answer });
   } catch (err) {
     next(err);

@@ -72,8 +72,7 @@ export const query_pdf = async (user_id: string, question: string, chat_id: stri
         if(history && history.messages){
             chat_history = history.messages.map(
                 ({ role, content }) => {
-                    if( role == "human" ) return new HumanMessage(content);
-                    else return new AIMessage(content)
+                    return role == "human" ? new HumanMessage(content): new AIMessage(content)
                 }
             )
         }
@@ -138,6 +137,67 @@ export const query_pdf = async (user_id: string, question: string, chat_id: stri
     }catch(err){
         throw err
     }    
+}
+
+// Create a summary for a document or a set of documents
+export const summarize_pdfs = async ( user_id: string, files: string[] ) => {
+    try {
+        if (!user_id) {
+            throw new Error("Summarize PDF: User ID is required!")
+        }
+
+        // Create a retriever to get all relevant document chunks
+        let retriever!: VectorStoreRetriever<Chroma>;
+        if (files && files.length == 0) {
+            retriever = vectorStore.asRetriever({
+                filter: { user_id },
+                k: 100  // Increased number of retrieved chunks for summarization
+            })
+        } else {
+            retriever = vectorStore.asRetriever({
+                filter: {
+                    "$and": [
+                        { user_id },
+                        { "filename": { "$in": files } }
+                    ]
+                },
+                k: 100
+            })
+        }
+
+        // Create prompts based on summary type
+        let systemPrompt = 
+            "Create a comprehensive summary of the following document chunks. " +
+            "Include main points, key findings, and important details. " +
+            "Organize the information in a logical flow. " +
+            `Keep the summary under 200 characters.\n\n` +
+            "{context}";
+
+        const summaryPrompt = ChatPromptTemplate.fromMessages([
+            ["system", systemPrompt]
+        ])
+
+        // Create the summary chain
+        const summaryChain = await createStuffDocumentsChain({
+            llm,
+            prompt: summaryPrompt,
+        })
+
+        // Create and excute the retrieval chain
+        const retrievalChain = await createRetrievalChain({
+            retriever,
+            combineDocsChain: summaryChain,
+        })
+
+        // Generate the summary
+        const result = await retrievalChain.invoke({
+            "input": "Generate a summary.",
+        })
+        return result.answer
+
+    } catch (err) {
+        throw err
+    }
 }
 
 

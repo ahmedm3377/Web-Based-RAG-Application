@@ -3,5 +3,10 @@ The user may chose to chat with multiple files and it is not practical to save
 the chat history per document in that case.
 
 
-- To include the chat history, we will need to have an indetifier for each chat
-so the user must create a chat first.
+- The initial version was a simple question-answering without context (history).
+The newer version considers the chat history.
+
+
+Resources:
+- https://js.langchain.com/docs/how_to/qa_chat_history_how_to/
+- https://medium.com/@eric_vaillancourt/mastering-langchain-rag-integrating-chat-history-part-2-4c80eae11b43
