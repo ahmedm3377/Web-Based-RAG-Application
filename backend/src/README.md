@@ -4,9 +4,9 @@ the chat history per document in that case.
 
 
 - The initial version was a simple question-answering without context (history).
-The newer version consider the chat history.
+The newer version considers the chat history.
 
 
 Resources:
-https://js.langchain.com/docs/how_to/qa_chat_history_how_to/
-https://medium.com/@eric_vaillancourt/mastering-langchain-rag-integrating-chat-history-part-2-4c80eae11b43
+- https://js.langchain.com/docs/how_to/qa_chat_history_how_to/
+- https://medium.com/@eric_vaillancourt/mastering-langchain-rag-integrating-chat-history-part-2-4c80eae11b43
