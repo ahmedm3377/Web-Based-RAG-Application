@@ -10,6 +10,8 @@ import { createHistoryAwareRetriever } from "langchain/chains/history_aware_retr
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { createRetrievalChain } from "langchain/chains/retrieval";
 import { AIMessage, BaseMessage, HumanMessage } from "@langchain/core/messages";
+import { LLMChain } from "langchain/chains";
+
 
 
 // Create embedding & vector store instances
@@ -44,7 +46,9 @@ export const save_pdf_chroma = async (file: Express.Multer.File, user_id: string
     }
 } 
 
+
 // Retrive relevant documents and pass the results to Ollama to answer the prompt
+type ChatMessage = { role: string, content: string }
 export const query_pdf = async (user_id: string, question: string, chat_id: string | null, files: string[]) => {
     try {
 
@@ -59,11 +63,21 @@ export const query_pdf = async (user_id: string, question: string, chat_id: stri
         }
 
         // Fetch the chat history if there is one
-        const history: [{ role: string, content: string }] | null = await historyModel.findOne(
+        const history: { messages: ChatMessage[] } | null = await historyModel.findOne(
             { _id: chat_id, "created_by.user_id": user_id},
             { _id: 0, messages: 1 }
         )   
 
+        let chat_history: BaseMessage[] = []
+        if(history && history.messages){
+            chat_history = history.messages.map(
+                ({ role, content }) => {
+                    if( role == "human" ) return new HumanMessage(content);
+                    else return new AIMessage(content)
+                }
+            )
+        }
+        
         // Retrieve the relevant documents
         let retriever!: VectorStoreRetriever<Chroma>;
         if(files && files.length == 0){
@@ -81,13 +95,12 @@ export const query_pdf = async (user_id: string, question: string, chat_id: stri
 
         // Create a prompt that includes the chat history
         const contextualizedQSystemPrompt = 
-            "Given a chat history and the latest user question which might reference context in the chat history," +
-            "formulate a standalone question which can be understood without the chat history. Do NOT answer the question, " +
-            "just reformulate it if needed and otherwise return it as is.";
+            "Given the chat history and the user's latest question, rephrase the question to be clear and brief. " +
+            "Avoid unnecessary details and keep the question to the point.";
 
         const contextualizedQPrompt = ChatPromptTemplate.fromMessages([
             ["system", contextualizedQSystemPrompt],
-            new MessagesPlaceholder("chathistory"),
+            new MessagesPlaceholder("chat_history"),
             ["human", "{input}"]
         ])
 
@@ -101,8 +114,7 @@ export const query_pdf = async (user_id: string, question: string, chat_id: stri
         // Create the full QA chain
         const systemPrompt =
             "You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer " +
-            "the question. If you don't know the answer, say that you don't know. Use three sentences maximum and keep the " +
-            "answer concise. \n\n" +
+            "the question. If you don't know the answer, say that you don't know. Give a direct answer and be concise. \n\n" +
             "{context}";
         
         const qaPrompt = ChatPromptTemplate.fromMessages([
@@ -121,17 +133,7 @@ export const query_pdf = async (user_id: string, question: string, chat_id: stri
             combineDocsChain: QAchain,
         })
 
-        let chat_history: BaseMessage[] = []
-        if(history){
-            chat_history = history.map(
-                ({ role, content }) => {
-                    if( role == "human" ) return new HumanMessage(content);
-                    else return new AIMessage(content)
-                }
-            )
-        }
         const aiMessage = await ragChain.invoke({ "input": question, "chat_history": chat_history })
-        console.log(aiMessage)
         return aiMessage.answer
     }catch(err){
         throw err
