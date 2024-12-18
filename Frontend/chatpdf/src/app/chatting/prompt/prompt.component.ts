@@ -1,47 +1,52 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ChatService } from '../../chat.service';
+interface chatMessage {   question: boolean, data: string }
+
 
 @Component({
   selector: 'app-prompt',
   imports: [ReactiveFormsModule],
-  styleUrls: ['../chatingStyle.css'],
+  styleUrls: [],
   template: `
+<div class="w-full mx-auto my-5 p-5 border-2 border-blue-500 rounded-lg bg-gray-100 shadow-lg">
+<form [formGroup]="form" >
 
-<form [formGroup]="form">
 
-<fieldset>
-    <legend>Upload a text file to chat with:</legend>
-<div style="width: 100%;">
+    <legend class="text-2xl text-blue-500 mb-2">Upload a text file to chat with:</legend>
+<div class="relative max-w-6xl">
     <input 
         id="file_input" 
         type="file" 
         (change)="onFileSelected($event)" 
         accept=".pdf, .txt, .doc, .docx" 
-        class="file-input"
+       class="inline-block my-2"
     >
-    <button (click)="uploadFile()" class="upload-button">Upload</button>
+    <button (click)="uploadFile()" class="absolute right-0 top-0 h-full bg-blue-500 text-white rounded-r-lg px-4 cursor-pointer transition duration-300 hover:bg-green-600">Upload</button>
     </div>
-</fieldset>
+
 
 <br />
 
-<div class="relative inline-block" style="width: 100%;">
+<div>
     <input 
         type="text" 
         placeholder="Search..." 
         formControlName="searchBox" 
         (keyup.enter)="search()"  
-        class="search-input"
+        class="pr-16 p-2 border-2 border-gray-300 rounded-lg transition-colors duration-300 focus:border-blue-500 focus:outline-none" 
+
     />
     <button 
         (click)="search()" 
-        class="absolute search-button"
+        class="bg-blue-500 text-white border-none rounded-md py-2 px-4 cursor-pointer transition duration-300 hover:bg-green-600"
+
     >
         >>
     </button>
 </div>
 </form>
+</div>
   `,
   styles: `
   
@@ -49,6 +54,7 @@ import { ChatService } from '../../chat.service';
 })
 export class PromptComponent {
   chatService = inject(ChatService);
+  msgFromChild = output<chatMessage[]>();
 
 
   form = inject(FormBuilder).nonNullable.group({
@@ -58,7 +64,13 @@ export class PromptComponent {
     search(){
       let textValue = this.form.controls.searchBox.value;
       if (textValue) {
-          this.chatService.SendQuery(textValue);
+          this.msgFromChild.emit([{ question: true, data: textValue }]);
+          let result = ""
+          this.chatService.SendQuery(textValue).subscribe(response => {result = response.data;});
+          
+          this.msgFromChild.emit([{ question: true, data: textValue },{ question: false, data: "123" }]);
+
+
           console.log(textValue);
           this.form.controls.searchBox.setValue('');
       }
