@@ -15,8 +15,8 @@ export class ChatService {
  
    #http = inject(HttpClient);
  
-   uploadFile(files: File) {
-     return this.#http.post<{ success: boolean, data: { processedFiles: string, failedFiles: string } }>(SERVER_URL + 'docs/upload', files);
+   uploadFile(formData: FormData) {
+     return this.#http.post<{ success: boolean, data: { processedFiles: string, failedFiles: string } }>(SERVER_URL + 'docs/upload', formData);
    }
    
    SendQuery(question:String) {

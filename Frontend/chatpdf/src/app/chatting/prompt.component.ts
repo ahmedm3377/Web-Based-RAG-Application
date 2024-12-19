@@ -94,9 +94,13 @@ export class PromptComponent {
   filename = "";
   uploadFile() {
     if (this.selectedFile) {
-      const result = this.chatService.uploadFile(this.selectedFile);
+      const formData = new FormData();
+      formData.append('files', this.selectedFile, this.selectedFile.name);
+      const result = this.chatService.uploadFile(formData);
       result.subscribe(response => {
+        console.log(response);
         if (response.success) {
+            
             alert("File uploaded successfully!"); 
             this.filename = response.data.processedFiles;
         }
