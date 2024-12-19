@@ -29,5 +29,8 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 
 app.listen(process.env.PORT, () => {
-  console.log(`Server is listening at http://localhost:${process.env.PORT}`);
+  // console.log(`Server is listening at http://localhost:${process.env.PORT}`);
+
+  console.log(`Server is listening at http://localhost:3000`);
+
 });

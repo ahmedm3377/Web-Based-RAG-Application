@@ -96,7 +96,6 @@ export const query_handler: RequestHandler<unknown, StandardResponse<string>, {q
 // Summarize handler to generate a summary for specifc pdfs
 export const summarize_handler: RequestHandler<unknown, StandardResponse<string>, unknown, {files: string}> = async function(req, res, next){
   try {
-    console.log(req.url)
     if (!req.user) throw new Error("Forbidden");
 
     const files = req.query.files ? req.query.files.split(",") : [];

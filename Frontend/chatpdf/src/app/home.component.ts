@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { UsersService } from './Users/user.service';
 
 @Component({
   selector: 'app-home',
@@ -15,8 +16,11 @@ import { RouterLink } from '@angular/router';
             Whether you're a researcher, a content creator, or just curious, this Application is designed to enhance your experience by providing tailored responses and comprehensive solutions.
         </p>
         <p class="mt-6 text-center">
+          @if(isLoggedIn){
+            <button [routerLink]="['upload']" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-300">Dive In</button>
+          }@else {
             <button [routerLink]="['signin']" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-300">Dive In</button>
-        </p>
+          }</p>
     </div>
     </div>
 
@@ -24,5 +28,9 @@ import { RouterLink } from '@angular/router';
   styles: ``
 })
 export class HomeComponent {
+
+userService = inject(UsersService);
+isLoggedIn = this.userService.isLoggedIn();
+  
 
 }

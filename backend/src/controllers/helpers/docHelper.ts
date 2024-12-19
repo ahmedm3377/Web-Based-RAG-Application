@@ -167,10 +167,7 @@ export const summarize_pdfs = async ( user_id: string, files: string[] ) => {
 
         // Create prompts based on summary type
         let systemPrompt = 
-            "Create a comprehensive summary of the following document chunks. " +
-            "Include main points, key findings, and important details. " +
-            "Organize the information in a logical flow. " +
-            `Keep the summary under 200 characters.\n\n` +
+            "Create a concise summary for the following context.\n\n" +
             "{context}";
 
         const summaryPrompt = ChatPromptTemplate.fromMessages([

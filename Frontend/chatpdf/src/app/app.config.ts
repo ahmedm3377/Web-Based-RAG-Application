@@ -48,6 +48,10 @@ export const appConfig: ApplicationConfig = {
       { path: 'chat', loadComponent: () => import('./chatting/chat.component').then(m => m.ChatComponent),
         canActivate: [ AuthGuardService]
        },
+       { path: 'upload', loadComponent: () => import('./chatting/upload.component').then(m => m.UploadComponent),
+        canActivate: [ AuthGuardService]
+       },
+
       { path: '**', component: HomeComponent },
     ], withComponentInputBinding(), withViewTransitions(), withInMemoryScrolling({ scrollPositionRestoration: 'enabled' })),
     provideAnimationsAsync(),

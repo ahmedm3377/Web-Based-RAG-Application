@@ -24,14 +24,15 @@ import { UsersService, initial_state } from './Users/user.service';
   @if (isOpen){
     <div class="opacity-100 scale-100 absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none transition ease-out duration-100 transform" 
    >
+   <div  class="py-1" role="none">
+         <button class="block w-full px-4 text-left text-sm text-gray-700" role="menuitem" tabindex="-2" id="menu-item-3" (click)="goToChat()">Upload new document</button>
+
+    </div>
    <div (mouseleave)="toggleDropdown()" class="py-1" role="none">
-         <button class="block w-full px-4 py-2 text-left text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-3" (click)="signout()">Sign out</button>
+         <button class="block w-full px-4 py-2 text-left text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-2" (click)="signout()">Sign out</button>
 
     </div>
-    <div (mouseleave)="toggleDropdown()" class="py-1" role="none">
-         <button class="block w-full px-4 py-2 text-left text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-3" (click)="goToChat()">Sign out</button>
-
-    </div>
+    
   </div>
   }@else {
   <div class="opacity-0 scale-95 absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none transition ease-out duration-100 transform" 
@@ -65,7 +66,7 @@ export class AppComponent {
   }
   
    goToChat() {
-    this.#router.navigate(['', 'chat']);
+    this.#router.navigate(['', 'upload']);
   }
 
 

@@ -72,7 +72,7 @@ export class SigninComponent {
         id: decoded.user_id,
         jwt: response.data.access_token
       });
-      this.#router.navigate(['chat']);
+      this.#router.navigate(['upload']);
     },
     error => {
       console.error('Error occurred:', error);

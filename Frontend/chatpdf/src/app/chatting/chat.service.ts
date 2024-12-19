@@ -24,4 +24,9 @@ export class ChatService {
    giveSummary(file: string) {
     return this.#http.get<{ success: boolean, data: string  }>(SERVER_URL + 'docs/summarize?files=' + file);
   }
+
+  filename = '';
+  setFilename(filename: string){
+    this.filename = filename;
+   }
 }
