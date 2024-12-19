@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage })
 const router = Router();
 
-router.post('/upload', upload.array('files'), upload_handler);
+router.post('/upload', upload.single('file'), upload_handler);
 
 router.post('/query', query_handler);
 router.get('/summarize', summarize_handler);
