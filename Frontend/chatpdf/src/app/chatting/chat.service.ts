@@ -11,16 +11,14 @@ import { SERVER_URL } from '../../../environments/environment.development';
 })
 export class ChatService {
 
-
- 
    #http = inject(HttpClient);
  
    uploadFile(formData: FormData) {
-     return this.#http.post<{ success: boolean, data: { processedFiles: string, failedFiles: string } }>(SERVER_URL + 'docs/upload', formData);
+    return this.#http.post<{ success: boolean, data: string }>(SERVER_URL + 'docs/upload', formData);
    }
    
-   SendQuery(question:String) {
-     return this.#http.post<{ success: boolean, data: string }>(SERVER_URL + 'docs/query', question);
+   SendQuery(query: String, filename: String) {
+    return this.#http.post<{ success: boolean, data: string }>(SERVER_URL + 'docs/query?file='+ filename, {query});
    }
 
    giveSummary(file: string) {

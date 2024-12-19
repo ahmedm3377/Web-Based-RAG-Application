@@ -10,7 +10,7 @@ import { jwtDecode } from 'jwt-decode';
   selector: 'app-signin',
   imports: [ReactiveFormsModule, RouterLink],
   template: `
-<form [formGroup]="form" (ngSubmit)="submit()" class="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+<form [formGroup]="form" (ngSubmit)="submit()" class="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md mt-20">
   <h2 class="text-2xl font-bold mb-6 text-center">Sign in</h2>
   
   <div class="mb-4">

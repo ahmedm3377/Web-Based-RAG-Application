@@ -7,13 +7,13 @@ import historyModel from '../models/history';
 // Upload handler to uploading documents, save them to MongoDB and Chroma 
 export const upload_handler: RequestHandler = async function(req, res, next){
   try {
-    if(!req.files){
+    if(!req.file){
       res.send({ success: false, data: 'No Files are attached!'});
       return
     }
-    
 
     if(!req.user) throw new Error('Forbidden');
+
     const file = req.file as Express.Multer.File;
     // Create an instance of the metadata to save in MongoDB
     const document = {
@@ -45,12 +45,10 @@ export const upload_handler: RequestHandler = async function(req, res, next){
 }
 
 // Query handler to answer user questions based on the uploaded
-export const query_handler: RequestHandler<unknown, StandardResponse<string>, {query: string, chat_id?: string}, {files: string}> = async function(req, res, next){
+export const query_handler: RequestHandler<unknown, StandardResponse<string>, {query: string, chat_id?: string}, {file: string}> = async function(req, res, next){
   try {
     if (!req.user) throw new Error("Forbidden");
-
-    console.log(req.body, req.params, req.query)
-    const files = req.query.files ? req.query.files.split(",") : [];
+    const files = req.query.file ? req.query.file.split(",") : [];
     const question = req.body.query;
     const chat_id = req.body.chat_id || null;
 
