@@ -9,48 +9,62 @@ interface chatMessage {   question: boolean, data: string }
   imports: [ReactiveFormsModule],
   styleUrls: [],
   template: `
-<div class="w-full mx-auto my-5 p-5 border-2 border-blue-500 rounded-lg bg-gray-100 shadow-lg">
+
+<div class="w-full max-w-6xl mx-auto my-5 p-5 border-2 border-blue-500 rounded-lg bg-gray-100 shadow-lg">
 <form [formGroup]="form" >
 
 
-    <legend class="text-2xl text-blue-500 mb-2">Upload a text file to chat with:</legend>
-<div class="relative max-w-6xl">
-    <input 
-        id="file_input" 
-        type="file" 
-        (change)="onFileSelected($event)" 
-        accept=".pdf, .txt, .doc, .docx" 
-       class="inline-block my-2"
-    >
-    <button (click)="uploadFile()" class="absolute right-0 top-0 h-full bg-blue-500 text-white rounded-r-lg px-4 cursor-pointer transition duration-300 hover:bg-green-600">Upload</button>
-    </div>
+  @if(fileUploaded){
+        <div class="relative w-full max-w-6xl">
+        <br/><p> File: {{selectedFile!.name}}   
+        <button (click)="getSummary()"
+        class="absolute right-20 bg-blue-500 text-white rounded-r-lg px-4 cursor-pointer transition duration-300 hover:bg-green-600"
+        >Summary</button>
+        <button (click)="toggleFileUploaded()"
+        class="absolute right-0  bg-blue-500 text-white rounded-r-lg px-4 cursor-pointer transition duration-300 hover:bg-green-600"
+        >+</button>
+
+      </p><br />
+        
+        </div>
+  }
+  @else{
 
 
-<br />
+        <p class="text-xl text-blue-500 mb-2">Upload a text file to chat with:</p><br />
+        <div class="relative w-full max-w-6xl">
+            <input 
+                id="file_input" 
+                type="file" 
+                (change)="onFileSelected($event)" 
+                accept=".pdf, .txt, .doc, .docx" 
+              class="inline-block my-2"
+            >
+            <button (click)="uploadFile()" class="absolute right-0 top-0 h-full bg-blue-500 text-white rounded-r-lg px-4 cursor-pointer transition duration-300 hover:bg-green-600">Upload</button>
+        </div>
 
-<div>
+
+        <br />
+  }
+
+<div class="relative w-full max-w-6xl">
     <input 
         type="text" 
         placeholder="Search..." 
         formControlName="searchBox" 
         (keyup.enter)="search()"  
-        class="pr-16 p-2 border-2 border-gray-300 rounded-lg transition-colors duration-300 focus:border-blue-500 focus:outline-none" 
+        class="inline-block w-full my-2 pr-16 p-2 border-2 border-gray-300 rounded-lg transition-colors duration-300 focus:border-blue-500 focus:outline-none" 
 
     />
     <button 
         (click)="search()" 
-        class="bg-blue-500 text-white border-none rounded-md py-2 px-4 cursor-pointer transition duration-300 hover:bg-green-600"
+        class="absolute right-0 top-0 h-full bg-blue-500 text-white rounded-r-lg px-4 cursor-pointer transition duration-300 hover:bg-green-600"
 
     >
         >>
     </button>
 </div>
-<div>
-  @if(selectedFile){
-    <p> File: {{selectedFile.name}}  <button (click)="getSummary()">Summary</button></p>
-  }
 
-</div>
 </form>
 </div>
   `,
@@ -85,6 +99,7 @@ export class PromptComponent {
     }
 
   selectedFile: File | null = null;
+  fileUploaded = false;
   
 
   onFileSelected(event: any) {
@@ -100,11 +115,18 @@ export class PromptComponent {
       result.subscribe(response => {
         console.log(response);
         if (response.success) {
-            
             alert("File uploaded successfully!"); 
             this.filename = response.data.processedFiles;
+            this.fileUploaded = true;
         }
-    });
+        else {
+          alert("File upload failed: ");
+        }
+    },
+      error => {
+        console.error('Error occurred:', error);
+        alert("File upload failed");
+      });
       console.log('Uploading file:', this.selectedFile);
 
     }
@@ -120,6 +142,10 @@ export class PromptComponent {
     }); 
 
   }
+
+  toggleFileUploaded(){
+    this.fileUploaded = false;
+  } 
 
 
 }

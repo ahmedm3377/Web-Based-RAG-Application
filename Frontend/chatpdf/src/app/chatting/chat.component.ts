@@ -17,7 +17,7 @@ import { CommonModule } from '@angular/common';
           <div class="bg-white rounded-lg shadow-md p-6 max-w-6xl w-full">
 
               <p  class="text-lg text-gray-700 mb-2 border-b pb-2">
-                Her is the summery of the file:
+                Here is the summery of the file:
               </p>
       
               <p class="text-lg text-gray-700">
@@ -44,9 +44,9 @@ import { CommonModule } from '@angular/common';
           </div>
         }
 
-      <app-prompt (msgFromChild)="receive($event)" (summary)="receiveSummary($event)"></app-prompt>
+      
    </div>
-
+<app-prompt (msgFromChild)="receive($event)" (summary)="receiveSummary($event)"></app-prompt>
    
   `,
   styles: ``
