@@ -1,6 +1,6 @@
 import { Component, inject, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ChatService } from '../../chat.service';
+import { ChatService } from './chat.service';
 interface chatMessage {   question: boolean, data: string }
 
 
@@ -45,6 +45,12 @@ interface chatMessage {   question: boolean, data: string }
         >>
     </button>
 </div>
+<div>
+  @if(selectedFile){
+    <p> File: {{selectedFile.name}}  <button (click)="getSummary()">Summary</button></p>
+  }
+
+</div>
 </form>
 </div>
   `,
@@ -55,6 +61,7 @@ interface chatMessage {   question: boolean, data: string }
 export class PromptComponent {
   chatService = inject(ChatService);
   msgFromChild = output<chatMessage[]>();
+  summary = output<string>();
 
 
   form = inject(FormBuilder).nonNullable.group({
@@ -68,7 +75,7 @@ export class PromptComponent {
           let result = ""
           this.chatService.SendQuery(textValue).subscribe(response => {result = response.data;});
           
-          this.msgFromChild.emit([{ question: true, data: textValue },{ question: false, data: "123" }]);
+          this.msgFromChild.emit([{ question: true, data: textValue },{ question: false, data: result }]);
 
 
           console.log(textValue);
@@ -78,16 +85,40 @@ export class PromptComponent {
     }
 
   selectedFile: File | null = null;
+  
 
   onFileSelected(event: any) {
     this.selectedFile = event.target.files[0];
   }
+
+  filename = "";
   uploadFile() {
     if (this.selectedFile) {
-      this.chatService.uploadFile(this.selectedFile);
+      const formData = new FormData();
+      formData.append('files', this.selectedFile, this.selectedFile.name);
+      const result = this.chatService.uploadFile(formData);
+      result.subscribe(response => {
+        console.log(response);
+        if (response.success) {
+            
+            alert("File uploaded successfully!"); 
+            this.filename = response.data.processedFiles;
+        }
+    });
       console.log('Uploading file:', this.selectedFile);
 
     }
+  }
+
+
+  getSummary(){
+
+    this.chatService.giveSummary(this.filename).subscribe(res => {
+      console.log(res);
+      this.summary.emit(res.data);
+
+    }); 
+
   }
 
 

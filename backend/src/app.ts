@@ -5,12 +5,14 @@ import { connect } from './db/mongo';
 import docsRoutes from './routes/documents';
 import { is_authenticated } from './utils/auth';
 import cors from 'cors';
+import path from 'path';
 
 const app = express();
 connect();
 
 app.use(express.json());
 app.use(cors())
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/users', userRoutes);
 app.use('/docs', is_authenticated, docsRoutes)

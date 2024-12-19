@@ -7,10 +7,12 @@ import historyModel from '../models/history';
 // Upload handler to uploading documents, save them to MongoDB and Chroma 
 export const upload_handler: RequestHandler = async function(req, res, next){
   try {
+    console.log(req);
     if(!req.files){
       res.send({ success: false, data: 'No Files are attached!'});
       return
     }
+    
 
     if(!req.user) throw new Error('Forbidden');
     const files = req.files as Express.Multer.File[];
