@@ -99,6 +99,7 @@ export class PromptComponent {
     }
 
   selectedFile: File | null = null;
+  fileUploaded = false;
   
 
   onFileSelected(event: any) {
@@ -135,6 +136,10 @@ export class PromptComponent {
     }); 
 
   }
+
+  toggleFileUploaded(){
+    this.fileUploaded = false;
+  } 
 
 
 }

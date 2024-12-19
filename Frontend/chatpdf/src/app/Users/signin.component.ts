@@ -55,12 +55,16 @@ export class SigninComponent {
   #router = inject(Router);
 
   form = inject(FormBuilder).nonNullable.group({
-    'email': ['', Validators.required, Validators.email],
+    'email': ['', [Validators.required, Validators.email]],
     'password': ['', Validators.required],
   });
 
   submit() {
     this.#user_service.signin(this.form.value as {email:String, password:String}).subscribe(response => {
+      if(response.success== false){
+          alert("Credentials are invalid!");  
+          return;
+      } 
       const decoded = jwtDecode(response.data.access_token) as Token;
       this.#state.$user.set({
         name: decoded.fullname,
@@ -69,7 +73,11 @@ export class SigninComponent {
         jwt: response.data.access_token
       });
       this.#router.navigate(['chat']);
-    });
+    },
+    error => {
+      console.error('Error occurred:', error);
+      alert("Credentials are invalid!");  
+    }); 
   }
 
 }
