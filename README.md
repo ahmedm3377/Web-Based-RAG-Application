@@ -96,7 +96,7 @@ Ensure the following are installed on your system:
 ## Project Structure
 
 ```
-final-project-MWA
+Web-Based-RAG-Application
 ├
 ├─ backend
 │  ├─ .env
